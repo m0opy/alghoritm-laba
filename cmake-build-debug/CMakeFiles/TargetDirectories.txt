@@ -1,0 +1,3 @@
+/Users/polinasetkina/CLionProjects/untitled14/cmake-build-debug/CMakeFiles/untitled14.dir
+/Users/polinasetkina/CLionProjects/untitled14/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/polinasetkina/CLionProjects/untitled14/cmake-build-debug/CMakeFiles/rebuild_cache.dir
