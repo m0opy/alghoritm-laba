@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.23"
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "untitled14::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-untitled14-Debug-be58d8bd6ac2fcd01cda.json",
+					"jsonFile" : "target-untitled14-Debug-275c59852241c0bc8629.json",
 					"name" : "untitled14",
 					"projectIndex" : 0
 				}
@@ -49,12 +49,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/Users/polinasetkina/CLionProjects/untitled14/cmake-build-debug",
-		"source" : "/Users/polinasetkina/CLionProjects/untitled14"
+		"build" : "C:/Users/Dima2/Desktop/labababa/alghoritm-laba/cmake-build-debug",
+		"source" : "C:/Users/Dima2/Desktop/labababa/alghoritm-laba"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 4
+		"minor" : 5
 	}
 }

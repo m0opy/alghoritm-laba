@@ -11,6 +11,84 @@ struct Edge {
     int dest;
     int wt;
 };
+class PQueue{
+public:
+//экземпляр элемента очереди с приоритетом
+    struct node {
+        int data; //значение элемента
+        node* next; //указатель на следующий элемент
+    };
+
+    node* head;
+    node* tail; //начало, конец
+    int length = 0;
+
+//добавление элемента(неприоритетное)
+    void insert(int data) {
+        node* q = new node;
+        if (length == 0){
+            head = q;
+        } else{
+            tail->next = q;
+        }
+        q->data = data;
+        q->next = NULL;
+        tail = q;
+        length++;
+    }
+
+//удаление элемента(приоритетное)
+    int Delete(int shortest[]) {
+        //пустая очередь
+        if (!head) {
+            std::cerr << "queue is empty\n";
+            exit(1);
+        }
+
+        //поиск элемента, с минимальным значением shortest
+        int min_shortest = shortest[head->data];
+        int min_key = head->data;
+        node* curr = head->next;
+        node* prev = head;
+
+        while (curr) {
+            if (shortest[curr->data] < min_shortest) {
+                min_shortest = shortest[curr->data];
+                min_key = curr->data;
+            }
+
+            curr = curr->next;
+        }
+
+        if (head->data == min_key) {
+            curr = head->next;
+            delete head;
+            head = curr;
+        } else {
+            prev = head;
+            curr = head->next;
+            while (curr) {
+                if (curr->data == min_key) {
+                    prev->next = curr->next;
+                    delete curr;
+                    break;
+                }
+
+                prev = curr;
+                curr = curr->next;
+            }
+        }
+
+        length--;
+        return min_key;
+    }
+
+//Проверка на пустоту
+    bool empty(){
+        return !head;
+    }
+};
+
 
 void addEdge(
         Edge* edgeArray,
@@ -38,10 +116,8 @@ void relaxDijkstra(
 
 // Функция поиска кратчайшего пути для вершин графа
 void dijkstra(
-        Edge* edges,
-        int edgeCount,
+        int** matrix,
         int vertex,
-        int start,
         int* shortest,
         int* pred
 );
@@ -131,7 +207,7 @@ int main() {
     setlocale(LC_ALL, "Russian");
     Edge* edge = new Edge[10];
 
-    int vertexes = 6;
+    int vertexes = 4;
     int edges = 0;
     int** matrix;
     int start = 0; // Начальная вершина
@@ -160,7 +236,7 @@ int main() {
     checking(edge, edges); // Функция проверки на отрицательный вес
 
     if (!flag) {
-        dijkstra(edge, edges, vertexes, 0, shortest, pred);
+        dijkstra(matrix, vertexes, shortest, pred);
         // Вывод кратчайших путей и их длин
         cout << '\n';
         for (int v = 0; v < vertexes; v++) {
@@ -208,21 +284,20 @@ void inicializeGraph(
         int& vertexes,
         int& edges
 ) {
-    addEdge(edgeArray, edges, 0, 1, 6);
+    /*addEdge(edgeArray, edges, 0, 1, 6);
     addEdge(edgeArray, edges, 0, 2, 8);
     addEdge(edgeArray, edges, 0, 3, 18);
     addEdge(edgeArray, edges, 1, 4, 11);
     addEdge(edgeArray, edges, 2, 3, 9);
     addEdge(edgeArray, edges, 4, 5, 5);
     addEdge(edgeArray, edges, 5, 3, 4);
-    addEdge(edgeArray, edges, 5, 2, 7);
-
-//    addEdge(edgeArray, edges, 0, 1, 3);
-//    addEdge(edgeArray, edges, 0, 2, 8);
-//    addEdge(edgeArray, edges, 1, 3, 1);
-//    addEdge(edgeArray, edges, 2, 1, 4);
-//    addEdge(edgeArray, edges, 3, 0, 2);
-//    addEdge(edgeArray, edges, 3, 2, 5);
+    addEdge(edgeArray, edges, 5, 2, 7);*/
+    addEdge(edgeArray, edges, 0, 1, 3);
+    addEdge(edgeArray, edges, 0, 2, 8);
+    addEdge(edgeArray, edges, 1, 3, 1);
+    addEdge(edgeArray, edges, 2, 1, 4);
+    addEdge(edgeArray, edges, 3, 0, 2);
+    addEdge(edgeArray, edges, 3, 2, 5);
 }
 
 void addEdge(
@@ -334,7 +409,18 @@ void relaxBellman(
         pred[v] = u;
     }
 }
-
+void relax(
+        int**matrix,
+        int*pred,
+        int*shortest,
+        int u,
+        int v
+){
+    if (shortest[u] != INT_MAX && shortest[u] + matrix[u][v] < shortest[v]) {
+        shortest[v] = shortest[u] + matrix[u][v];
+        pred[v] = u;
+    }
+}
 
 void checking(
         Edge* e,
@@ -368,48 +454,32 @@ void bellmanFord(
 
 // Функция Dijkstra для поиска кратчайших путей из начальной вершины start
 void dijkstra(
-        Edge* edges,
-        int edgeCount,
+        int** matrix,
         int vertex,
-        int start,
         int* shortest,
         int* pred
 ) {
-
-//    bool* q = new bool[vertex](); // Массив-флаг для отслеживания вершин, для которых shortest еще не известно
-//    //shortest[start] = 0; // Начальная вершина имеет кратчайший путь 0
-//
-//    for (int i = 0; i < vertex - 1; i++) {
-//        int u = -1;
-//        // Ищем вершину u с минимальным значением shortest из множества непосещенных вершин
-//        for (int v = 0; v < vertex; v++) {
-//            if (!q[v] && (u == -1 || shortest[v] < shortest[u])) {
-//                u = v;
-//            }
-//        }
-//
-//        if (u == -1) {
-//            break; // Все оставшиеся вершины недостижимы, завершаем алгоритм
-//        }
-//
-//        q[u] = true; // Помечаем вершину u как посещенную
-//
-//        // Обновляем кратчайшие пути до соседних вершин, проходя через вершину u
-//        for (int v = 0; v < edgeCount; v++) {
-//            if (!q[edges[v].dest] && edges[v].src == u && shortest[u] != INT_MAX) {
-//                relaxDijkstra(edges, u, v, shortest, pred);
-//            }
-//        }
-//
-//    }
-
-//    delete[] q; // Освобождаем выделенную память для массива-флага
-    for (int i = 0; i < vertex; i++) { // Цикл, чтобы алгоритм был не бесконечен
-        for (int j = 0; j < edgeCount; j++) { // Цикл по j от 0 до 5 (по номеру ребер)
-            relaxBellman(edges, j, shortest, pred);
-            cout << shortest[j] << '\t';
-        }
+    PQueue pqueue;
+    for (int i = 0; i < vertex; i++) { // Добавление всех вершин в очередь с приоритетом
+        pqueue.insert(i);
     }
+
+    while (!pqueue.empty()) { // Пока очередь не пуста
+        int u = pqueue.Delete(shortest); // Записываем в u элемент с наименьшим значением shortest[u]
+        // и удаляем его из очереди
+
+        for (int v = 0; v < vertex; v++) { // Проходим по всем вершинам
+            if (matrix[u][v] > 0) { // Если существует ребро
+                relax(matrix,pred, shortest,u,v); // Релаксация ребра
+            }
+        }
+        for (int v = 0; v < vertex; v++) {
+            std::cout << "(" << shortest[v] << ") ";
+        }
+        cout << endl;
+
+    }
+
 }
 
 void floydWarshall(
