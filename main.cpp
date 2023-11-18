@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stack>
+#include <windows.h>
 using namespace std;
 #define MAX 100
 bool flag = false;
@@ -11,9 +12,9 @@ struct Edge {
     int dest;
     int wt;
 };
-class PQueue{
+class PQueue {
 public:
-//экземпляр элемента очереди с приоритетом
+    //экземпляр элемента очереди с приоритетом
     struct node {
         int data; //значение элемента
         node* next; //указатель на следующий элемент
@@ -23,12 +24,13 @@ public:
     node* tail; //начало, конец
     int length = 0;
 
-//добавление элемента(неприоритетное)
+    //добавление элемента(неприоритетное)
     void insert(int data) {
         node* q = new node;
-        if (length == 0){
+        if (length == 0) {
             head = q;
-        } else{
+        }
+        else {
             tail->next = q;
         }
         q->data = data;
@@ -37,7 +39,7 @@ public:
         length++;
     }
 
-//удаление элемента(приоритетное)
+    //удаление элемента(приоритетное)
     int Delete(int shortest[]) {
         //пустая очередь
         if (!head) {
@@ -64,7 +66,8 @@ public:
             curr = head->next;
             delete head;
             head = curr;
-        } else {
+        }
+        else {
             prev = head;
             curr = head->next;
             while (curr) {
@@ -83,8 +86,8 @@ public:
         return min_key;
     }
 
-//Проверка на пустоту
-    bool empty(){
+    //Проверка на пустоту
+    bool empty() {
         return !head;
     }
 };
@@ -104,14 +107,6 @@ void checking(
         int edges
 );
 
-// Функция вычесления кратчайшего пути между двух вершин, у которых имеется ребро (u v)
-void relaxDijkstra(
-        Edge* edges,
-        int u,
-        int v,
-        int* shortest,
-        int* pred
-);
 
 
 // Функция поиска кратчайшего пути для вершин графа
@@ -130,11 +125,12 @@ void floydWarshall(
 );
 
 void bellmanFord(
-        int vertexes,
-        Edge* e,
-        int edges,
-        int* shortest,
-        int* pred
+        int vertexes, //Количество вершин
+        Edge* e, //Массив ребер
+        int** matrix,
+        int edges, // Количество ребер
+        int* shortest, // Массив кратчайших путей до вершины
+        int* pred // Массив, хранящий значение вершины на пути в вершину
 );
 
 void primMST(
@@ -204,10 +200,9 @@ void printFloydWarshallResult(
 
 int main() {
     // Локализация
-    setlocale(LC_ALL, "Russian");
     Edge* edge = new Edge[10];
 
-    int vertexes = 4;
+    int vertexes = 8;
     int edges = 0;
     int** matrix;
     int start = 0; // Начальная вершина
@@ -223,7 +218,7 @@ int main() {
     /*=================================================================================*/
     cout << "АЛГОРИТМ БЕЛЛМАНА-ФОРДА:\n";
     printMatrix(matrix, vertexes);
-    bellmanFord(vertexes, edge,edges, shortest, pred);
+    bellmanFord(vertexes, edge,matrix, edges, shortest, pred);
     for (int v = 0; v < vertexes; v++) {
         std::cout << "Кратчайший путь до вершины " << v << " = " << shortest[v] << " (предшествующая вершина: " << pred[v] << ")\n";
     }
@@ -292,12 +287,14 @@ void inicializeGraph(
     addEdge(edgeArray, edges, 4, 5, 5);
     addEdge(edgeArray, edges, 5, 3, 4);
     addEdge(edgeArray, edges, 5, 2, 7);*/
-    addEdge(edgeArray, edges, 0, 1, 3);
+    addEdge(edgeArray, edges, 0, 1, 6);
     addEdge(edgeArray, edges, 0, 2, 8);
-    addEdge(edgeArray, edges, 1, 3, 1);
-    addEdge(edgeArray, edges, 2, 1, 4);
-    addEdge(edgeArray, edges, 3, 0, 2);
-    addEdge(edgeArray, edges, 3, 2, 5);
+    addEdge(edgeArray, edges, 0, 3, 18);
+    addEdge(edgeArray, edges, 1, 4, 11);
+    addEdge(edgeArray, edges, 2, 3, 9);
+    addEdge(edgeArray, edges, 4, 5, 5);
+    addEdge(edgeArray, edges, 5, 3, 4);
+    addEdge(edgeArray, edges, 5, 2, 7);
 }
 
 void addEdge(
@@ -380,44 +377,16 @@ void printFloydWarshallResult(
     }
 }
 
-// Функция Relax - обновление кратчайших путей для пары вершин (u, v)
-void relaxDijkstra(
-        Edge* edges,
-        int u,
-        int v,
-        int* shortest,
-        int* pred
-) {
-    //shortest[edges[v].dest]
-    if (shortest[u] != INT_MAX && shortest[u] + edges[v].wt < shortest[edges[v].dest]) {
-        shortest[edges[v].dest] = shortest[u] + edges[v].wt; // Если новый путь короче, обновляем shortest
-        pred[edges[v].dest] = u; // Обновляем предшествующую вершину для v
-    }
-}
-void relaxBellman(
-        Edge* edges,
-        int j,
-        int* shortest,
-        int* pred
-) {
-    int u = edges[j].src; // u - начало ребра (откуда)
-    int v = edges[j].dest; // v - конец ребра (куда)
-    int weight = edges[j].wt; // weight - вес ребра
-    if (shortest[u] != INT_MAX && shortest[u] + weight < shortest[v]) { // По хорошему засунуть в функцию relax,
-        // реализовать вывод на каждой итерации я не смогла((((
-        shortest[v] = shortest[u] + weight;
-        pred[v] = u;
-    }
-}
+
 void relax(
-        int**matrix,
-        int*pred,
-        int*shortest,
+        int weight,
+        int* pred,
+        int* shortest,
         int u,
         int v
-){
-    if (shortest[u] != INT_MAX && shortest[u] + matrix[u][v] < shortest[v]) {
-        shortest[v] = shortest[u] + matrix[u][v];
+) {
+    if (shortest[u] != INT_MAX && shortest[u] + weight < shortest[v]) {
+        shortest[v] = shortest[u] + weight;
         pred[v] = u;
     }
 }
@@ -433,18 +402,43 @@ void checking(
         }
     }
 }
+void printTempResult(
+        int vertexes,
+        int* shortest,
+        int* pred
+) {
+    cout << "==============================\n";
+    cout << "SHORTEST\n";
+    for (int k = 0; k < vertexes; k++) {
+        std::cout << "(" << shortest[k] << ") ";
+    }
+    cout << endl;
 
+    cout << "PRED\n";
+    for (int k = 0; k < vertexes; k++) {
+        std::cout << "(" << pred[k] << ") ";
+    }
+    cout << endl;
+    cout << endl;
+}
 void bellmanFord(
         int vertexes, //Количество вершин
         Edge* e, //Массив ребер
+        int** matrix,
         int edges, // Количество ребер
         int* shortest, // Массив кратчайших путей до вершины
         int* pred // Массив, хранящий значение вершины на пути в вершину
 ) {
+    printTempResult(vertexes, shortest, pred);
     for (int i = 0; i < vertexes - 1; i++) { // Цикл, чтобы алгоритм был не бесконечен
         for (int j = 0; j < edges; j++) { // Цикл по j от 0 до 5 (по номеру ребер)
-            relaxBellman(e,j, shortest, pred);
+            relax(matrix[i][j], pred, shortest, i, j); // Релаксация ребра
+            /*            relaxBellman(e,j, shortest, pred);*/
+
         }
+        cout << i << "-ая итерация\n";
+        printTempResult(vertexes, shortest, pred);
+
     }
     cout << endl;
 }
@@ -470,13 +464,23 @@ void dijkstra(
 
         for (int v = 0; v < vertex; v++) { // Проходим по всем вершинам
             if (matrix[u][v] > 0) { // Если существует ребро
-                relax(matrix,pred, shortest,u,v); // Релаксация ребра
+                relax(matrix[u][v], pred, shortest, u, v); // Релаксация ребра
+                cout << "==============================\n";
+                cout << "SHORTEST\n";
+                for (int k = 0; k < vertex; k++) {
+                    std::cout << "(" << shortest[k] << ") ";
+                }
+                cout << endl;
+
+                cout << "PRED\n";
+                for (int k = 0; k < vertex; k++) {
+                    std::cout << "(" << pred[k] << ") ";
+                }
+                cout << endl;
+                cout << endl;
             }
         }
-        for (int v = 0; v < vertex; v++) {
-            std::cout << "(" << shortest[v] << ") ";
-        }
-        cout << endl;
+
 
     }
 
